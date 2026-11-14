@@ -18,6 +18,10 @@ def prepare(html,version,stamp,asof):
         if html.count('</body>')!=1:
             raise RuntimeError('首頁body標記不完整')
         html=html.replace('</body>','<script id="macro-overview-script" src="macro.js?v=1"></script>\n</body>',1)
+    if 'id="external-tv-script"' not in html:
+        if html.count('</body>')!=1:
+            raise RuntimeError('首頁body標記不完整')
+        html=html.replace('</body>','<script id="external-tv-script" src="external-tv.js?v=1"></script>\n</body>',1)
     html=html.replace('搜尋代號，例如 SPY、SMH','搜尋代號／中文，例如 XSD、半導體').replace('搜尋股票代號','搜尋代號或中文描述')
     if 'id="site-version"' not in html:
         if html.count('</header>')!=1:
