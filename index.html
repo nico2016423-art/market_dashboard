@@ -2,388 +2,76 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>股票市場儀表盤</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>APEX 市場儀表盤</title>
 <style>
-*{box-sizing:border-box}body{font-family:Arial,sans-serif;margin:0;padding:0;display:flex;height:100vh;background-color:#1a1a1a;color:#e0e0e0}
-.ticker-table th.sorted-column{background-color:#3b4a6b!important}.ticker-table td.sorted-column{background-color:#2a3441}
-.ticker-list{width:800px;background-color:#1a1a1a;padding:0;overflow-y:auto;border-right:1px solid #333}.chart-container{flex:1;display:flex;flex-direction:column;padding:10px;background-color:#1a1a1a;min-height:0}.group-container{margin-bottom:15px}
-.group-header{background-color:#2d3748;padding:6px 8px;font-weight:bold;font-size:.9em;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;position:sticky;top:0;z-index:3;color:#e0e0e0;border-bottom:1px solid #444}.group-header:hover{background-color:#374151}.group-header-title{cursor:pointer}.group-header-actions{display:flex;align-items:center;gap:6px;margin-left:auto}
-.group-chart-btn{font-family:Arial,sans-serif;font-size:11px;font-weight:600;background-color:#1f2933;color:#e0e0e0;padding:4px 8px;border:1px solid #4a5568;border-radius:3px;cursor:pointer;text-transform:uppercase;letter-spacing:.03em}.group-chart-btn:hover{background-color:#374151}
-.legend{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.legend-item{padding:2px 6px;border-radius:6px;font-size:.75em;color:white;user-select:none}.ticker-table{width:100%;border-collapse:collapse;font-size:.85em;table-layout:fixed}
-.ticker-table th:nth-child(3),.ticker-table td:nth-child(3),.ticker-table th:nth-child(4),.ticker-table td:nth-child(4),.ticker-table th:nth-child(5),.ticker-table td:nth-child(5),.ticker-table th:nth-child(6),.ticker-table td:nth-child(6){width:59px;padding:6px 4px;overflow:hidden}.ticker-table th:nth-child(10),.ticker-table td:nth-child(10){width:110px;padding:2px 4px;overflow:hidden}
-.ticker-table thead{position:sticky;z-index:2}.ticker-table th{text-align:left;padding:6px 8px;background-color:#2d3748;cursor:pointer;user-select:none;font-weight:bold;border-bottom:1px solid #444;color:#e0e0e0}.ticker-table th:hover{background-color:#374151}.ticker-table th.sortable{cursor:pointer}.ticker-table th.sortable:hover{color:#fff}.ticker-table th.sort-asc::after{content:" ↑"}.ticker-table th.sort-desc::after{content:" ↓"}.ticker-table td{padding:6px 8px;border-bottom:1px solid #333;vertical-align:middle;color:#e0e0e0}
-.ticker-row{cursor:pointer;transition:all .2s}.ticker-row:hover{background-color:#2a2a2a}.ticker-row.active{background-color:#374151}.ticker-table td.price-up{color:#10b981!important;font-weight:bold}.ticker-table td.price-down{color:#ef4444!important;font-weight:bold}
-.value-visualization{position:relative;display:inline-block;padding:2px 4px;border-radius:3px;min-width:45px;max-width:100%;text-align:right}.value-bar{position:absolute;top:0;height:100%;border-radius:3px;opacity:.2;z-index:0;max-width:100%}.value-bar.positive{background-color:#10b981;left:0;right:auto}.value-bar.negative{background-color:#ef4444;right:0;left:auto}.value-text{position:relative;z-index:1}.rs-chart{width:100%;max-width:100px;height:30px;display:block;object-fit:contain}.tradingview-widget-container{flex:1;min-height:0}
-.key-hint{font-size:11px;color:#9ca3af;margin-top:15px;padding:5px;background-color:#2d3748;border-radius:3px;position:sticky;bottom:0;border:1px solid #444}.long-etf{color:#4ade80;cursor:pointer;text-decoration:underline}.short-etf{color:#f87171;cursor:pointer;text-decoration:underline}.etf-list{white-space:nowrap;font-size:.8em}.etf-list span:hover{font-weight:bold}.ticker-label{display:inline-block;padding:2px 8px;border-radius:12px;background-color:#4a5568;color:#e0e0e0}.abc-rating{display:inline-block;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;font-weight:bold;color:white}.abc-a{background-color:#3b82f6}.abc-b{background-color:#10b981}.abc-c{background-color:#f59e0b}
-.economic-events{margin-bottom:10px}.events-button,.column-guide-btn{font-family:Arial,sans-serif;font-size:14px;font-weight:bold;background-color:#2d3748;color:#e0e0e0;padding:8px 12px;border:1px solid #4a5568;border-radius:4px;cursor:pointer;width:100%;text-align:left;text-transform:uppercase;letter-spacing:.02em}.events-button:hover,.column-guide-btn:hover{background-color:#374151}
-.events-content{display:none;position:absolute;top:100%;left:0;right:0;background-color:#2d3748;min-width:100%;z-index:1000;border-radius:4px;max-height:400px;overflow-y:auto;padding:10px 12px;border:1px solid #4a5568;margin-top:4px;font-family:Arial,sans-serif;font-size:.8em;color:#e0e0e0;line-height:1.5}.economic-events:hover .events-content{display:block}.event-item{padding:10px 12px;border-bottom:1px solid #4a5568;background-color:#1a1a1a;font-family:Arial,sans-serif;font-size:.8em;line-height:1.5}.event-item:hover{background-color:#374151}.event-item:last-child{border-bottom:none}.event-item .event-datetime{font-weight:bold;color:#a5b4fc}.event-item .event-name{color:#cbd5e1}
-.column-guide{margin-bottom:10px;position:relative}.column-guide-content{display:none;position:absolute;top:100%;left:0;right:0;background-color:#2d3748;z-index:999;border-radius:4px;max-height:420px;overflow-y:auto;padding:10px 12px;border:1px solid #4a5568;margin-top:4px;font-size:.8em;color:#e0e0e0;line-height:1.5}.column-guide:hover .column-guide-content{display:block}.column-guide dl{margin:0}.column-guide dt{font-weight:bold;color:#a5b4fc;margin-top:8px}.column-guide dt:first-child{margin-top:0}.column-guide dd{margin:2px 0 0 12px;color:#cbd5e1}.loading-msg{padding:20px;text-align:center;color:#9ca3af}
-.multi-chart-panel{flex:1;min-height:0;overflow:auto;display:none}.multi-group-title{margin:8px 0 4px;font-size:.85rem;font-weight:600;color:#9ca3af}.multi-chart-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.econ-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:9999}.econ-modal{background:#111827;border-radius:8px;border:1px solid #4a5568;padding:8px 8px 4px;max-width:440px;width:440px;max-height:600px;box-shadow:0 10px 30px rgba(0,0,0,.7)}.econ-modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:.9rem;font-weight:600;color:#e0e0e0}.econ-modal-close{background:transparent;border:none;color:#9ca3af;cursor:pointer;font-size:1.1rem;line-height:1;padding:0 2px}.econ-modal-close:hover{color:#fff}
-::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:#1a1a1a}::-webkit-scrollbar-thumb{background:#4a5568;border-radius:4px}
+:root{color-scheme:dark;--bg:#11151d;--panel:#171d28;--line:#303a4b;--muted:#9daec6;--left: min(800px,55vw)}
+*{box-sizing:border-box}body{margin:0;height:100vh;height:100dvh;display:flex;flex-direction:column;background:var(--bg);color:#e5eaf3;font:14px Arial,"Microsoft JhengHei",sans-serif}button,input{font:inherit}button,a,input{touch-action:manipulation}button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible,#splitter:focus-visible{outline:2px solid #79b1ff;outline-offset:3px}button{cursor:pointer;color:inherit;background:#253146;border:1px solid #42516a;border-radius:6px;padding:7px 10px}button:hover{background:#33435b}a{color:#9fc9ff}header{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}h1{margin:0;font-size:19px;letter-spacing:.03em}.subtitle{color:var(--muted);font-size:12px;margin-top:5px}#status{color:var(--muted);font-size:12px}.workspace{display:flex;flex:1;min-height:0;min-width:0}.ticker-list{width:var(--left);min-width:380px;flex:0 0 auto;display:flex;flex-direction:column;min-height:0;background:var(--panel)}.list-tools{padding:12px;border-bottom:1px solid var(--line)}.search-line{display:flex;align-items:center;gap:8px}#search{min-width:0;flex:1;padding:10px 12px;background:#101722;color:#fff;border:1px solid #42516a;border-radius:6px}#result-count{font-size:12px;color:var(--muted);margin-top:7px}#category-nav{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}#category-nav button{padding:5px 8px;font-size:12px}.utility-row{display:flex;gap:8px;align-items:start;margin-top:10px;flex-wrap:wrap}.utility-row>button,.utility-row summary{font-size:12px}.guide{flex:1;min-width:160px}.guide summary{cursor:pointer;padding:7px 10px;border:1px solid #42516a;border-radius:6px;background:#253146}.guide dl{font-size:12px;line-height:1.65;padding:10px;margin:6px 0 0;background:#101722;border:1px solid var(--line);border-radius:6px}.guide dt{color:#b4ceff;font-weight:600}.guide dd{margin:0 0 8px}.groups-scroll{flex:1;min-height:0;overflow:auto;scroll-behavior:smooth}.group-container{margin-bottom:14px;scroll-margin-top:8px}.group-header{background:#263248;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;border-bottom:1px solid #42516a}.group-title{font-weight:600}.group-count{font-size:11px;color:var(--muted);margin-left:6px}.group-chart-btn{font-size:11px;padding:5px 8px}.legend{display:flex;gap:5px;flex-wrap:wrap;width:100%}.legend-item{padding:2px 6px;border-radius:4px;font-size:10px;color:#fff}.table-scroll{overflow-x:auto}.ticker-table{border-collapse:collapse;width:100%;min-width:790px;font-size:12px;table-layout:fixed;font-variant-numeric:tabular-nums}.ticker-table th,.ticker-table td{padding:7px 5px;border-bottom:1px solid #2a3444;text-align:right;white-space:nowrap}.ticker-table th{background:#202b3d;color:#c9d7ef;font-size:11px}.ticker-table th button{background:transparent;border:0;border-radius:2px;padding:3px 0;font:inherit;color:inherit;white-space:nowrap}.ticker-table th:first-child,.ticker-table td:first-child{text-align:left;width:76px}.ticker-table th:nth-child(2),.ticker-table td:nth-child(2){text-align:center;width:43px}.ticker-table th:nth-child(9){width:76px}.ticker-table th:nth-child(10){width:100px}.ticker-table th:last-child{width:96px}.ticker-table td:last-child{white-space:normal}.ticker-row{cursor:pointer}.ticker-row:hover{background:#222e40}.ticker-row.active{background:#2b3b54;box-shadow:inset 3px 0 #80b7ff}.ticker-table th.sorted-column{background:#364d70}.ticker-table td.sorted-column{background:rgba(111,152,219,.09)}.ticker-table th.sort-asc button::after{content:" ↑"}.ticker-table th.sort-desc button::after{content:" ↓"}.ticker-label{display:inline-block;padding:3px 6px;border-radius:5px;background:#34425a;color:#fff}.abc-rating{display:inline-block;width:20px;height:20px;line-height:20px;text-align:center;border-radius:50%;color:white;font-weight:bold}.abc-a{background:#3b82f6}.abc-b{background:#139d76}.abc-c{background:#a96d13}.price-up{color:#4adea5!important}.price-down{color:#fb8585!important}.value-visualization{position:relative;display:inline-block;min-width:48px;padding:2px 3px}.value-bar{position:absolute;top:0;height:100%;opacity:.18;border-radius:3px}.value-bar.positive{left:0;background:#10b981}.value-bar.negative{right:0;background:#ef4444}.value-text{position:relative}.rs-chart{display:block;width:100%;height:30px;object-fit:contain}.etf-link{border:0;background:transparent;padding:2px;font-size:10px;text-decoration:underline}.long-etf{color:#6ce5a2}.short-etf{color:#fb9292}.missing{color:#8190a8}.key-hint{padding:8px 10px;border-top:1px solid var(--line);font-size:11px;line-height:1.5;color:var(--muted)}#splitter{width:8px;flex:0 0 8px;cursor:col-resize;touch-action:none;background:#101722;border-left:1px solid var(--line);border-right:1px solid var(--line)}#splitter:hover,#splitter:focus{background:#476eaa}.chart-container{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;padding:10px;gap:8px}.chart-toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;background:var(--panel);border:1px solid var(--line);border-radius:7px}.chart-toolbar small{color:var(--muted)}#selected-symbol{margin-left:5px;color:#fff;font-weight:bold}.chart-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.chart-actions a{font-size:12px}.chart-actions button{font-size:12px;padding:5px 8px}#chart-mode{font-size:12px;color:var(--muted)}#single-chart-panel{flex:1;min-height:0;display:flex;flex-direction:column}#tradingview-chart{flex:1;min-height:0;width:100%;height:100%}.tradingview-credit{font-size:11px;color:var(--muted);padding-top:5px}.multi-chart-panel{flex:1;min-height:0;overflow:auto;display:none}.multi-chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:10px}.chart-card{min-width:0;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--panel)}.chart-card-bar{padding:7px 9px;display:flex;justify-content:space-between;gap:8px;font-size:12px}.chart-card-widget{height:325px}.loading-msg{text-align:center;padding:28px 14px;color:var(--muted);line-height:1.7}.loading-msg button{margin-top:10px}.error{color:#ffaaa5}.econ-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:9999;padding:12px}.econ-modal{width:440px;max-width:100%;max-height:95dvh;overflow:auto;background:#111827;border:1px solid #4a5568;border-radius:9px;padding:10px}.econ-modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}.econ-modal-close{font-size:20px;padding:0 8px}.tradingview-widget-container{min-width:0}#calendar-widget{width:100%;height:550px}.tradingview-widget-copyright{font-size:11px;padding-top:4px}body.resizing{user-select:none;cursor:col-resize}body.resizing iframe{pointer-events:none}[hidden]{display:none!important}::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:#111722}::-webkit-scrollbar-thumb{background:#44546c;border-radius:4px}
+@media(max-width:1050px){body{height:auto;min-height:100dvh}.workspace{flex-direction:column;flex:none;overflow:visible}.ticker-list{width:100%!important;min-width:0;height:52dvh;min-height:340px;flex:none}#splitter{display:none}.chart-container{height:72dvh;min-height:500px;flex:none}header{padding:10px 12px}h1{font-size:17px}.list-tools{padding:9px}.groups-scroll{scroll-behavior:auto}}
 </style>
 </head>
 <body>
-<div class="ticker-list">
-<div class="economic-events" style="position:relative;margin-bottom:10px;"><button class="events-button" type="button" onclick="openEconomicCalendar()">經濟日曆</button></div>
-<div class="column-guide" style="position:relative"><button class="column-guide-btn" type="button">欄位說明</button><div class="column-guide-content"><dl>
-<dt>評級</dt><dd>ABC 評級（A＝EMA10 &gt; EMA20 &gt; SMA50，上升趨勢；B＝多空交錯；C＝下降趨勢）。</dd>
-<dt>ATRx</dt><dd>與50日簡單移動平均線（SMA50）的距離，以 ATR 倍數表示。</dd>
-<dt>1月-VARS</dt><dd>最近21日相對 SPY 的波動調整相對強度位置（0–100%）。</dd>
-</dl></div></div>
-<div id="groups-container"></div>
-<div class="key-hint">↑ ↓ 使用方向鍵切換標的 · 數據透過 GitHub Actions 每日自動更新 · 來源：Yahoo Finance</div>
-</div>
-<div id="economic-calendar-modal-overlay" class="econ-modal-overlay" onclick="closeEconomicCalendar(event)"><div class="econ-modal" onclick="event.stopPropagation()">
-<div class="econ-modal-header"><span>經濟日曆</span><button type="button" class="econ-modal-close" onclick="closeEconomicCalendar(event)" aria-label="關閉經濟日曆">×</button></div>
-<div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div><div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/economic-calendar/" rel="noopener nofollow" target="_blank"><span class="blue-text">經濟日曆</span></a><span class="trademark"> 由 TradingView 提供</span></div>
-<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
-{"colorTheme":"dark","isTransparent":false,"locale":"zh_TW","countryFilter":"us","importanceFilter":"-1,0,1","width":400,"height":550}
-</script></div></div></div>
-<div class="chart-container"><div id="single-chart-panel" style="flex:1;min-height:0;display:flex;"><div class="tradingview-widget-container"><div id="tradingview-chart" style="height:100%;width:100%;"></div><div style="color:#9ca3af;font-size:11px;margin-top:4px;"><a href="https://www.tradingview.com/" target="_blank" rel="noopener" style="color:#9ca3af;">在 TradingView 追蹤全球市場</a></div></div></div><div id="multi-chart-panel" class="multi-chart-panel"></div></div>
+<header><div><h1>APEX 市場儀表盤</h1><div class="subtitle">市場概覽 · 板塊輪動 · 主題觀察</div></div><div id="status" role="status">正在載入數據……</div></header>
+<main class="workspace">
+<aside class="ticker-list" aria-label="分類股票清單">
+<div class="list-tools"><div class="search-line"><input id="search" type="search" placeholder="搜尋代號，例如 SPY、SMH" aria-label="搜尋股票代號" autocomplete="off"><button id="clear-search" type="button">清除</button></div><div id="result-count" aria-live="polite">等待數據</div><nav id="category-nav" aria-label="分類快捷導覽"></nav><div class="utility-row"><button id="calendar-open" type="button">經濟日曆</button><details class="guide"><summary>欄位說明</summary><dl id="column-guide"></dl></details></div></div>
+<div class="groups-scroll" id="groups-scroll"><div id="groups-container"><div class="loading-msg">正在載入數據……</div></div><div id="no-results" class="loading-msg" hidden>找不到符合的代號，請更改搜尋文字。</div></div>
+<div class="key-hint">↑ ↓ 切換可見標的 · 表頭點擊三次：升序／降序／還原<br>清單為每日更新快照，並非即時報價 · 來源：Yahoo Finance</div>
+</aside>
+<div id="splitter" role="separator" aria-label="調整股票清單寬度，可使用左右方向鍵" aria-orientation="vertical" aria-valuemin="380" aria-valuemax="1000" aria-valuenow="800" tabindex="0"></div>
+<section class="chart-container" aria-label="圖表區"><div class="chart-toolbar"><div><small>清單選取</small><span id="selected-symbol">—</span><div id="chart-mode">單圖模式</div></div><div class="chart-actions"><a id="tv-open" href="https://www.tradingview.com/" target="_blank" rel="noopener noreferrer">在 TradingView 開啟</a><button id="single-mode" type="button" hidden>返回單圖</button></div></div><div id="single-chart-panel"><div id="tradingview-chart"></div><div class="tradingview-credit"><a href="https://www.tradingview.com/" target="_blank" rel="noopener">圖表由 TradingView 提供</a> · 上方連結跟隨清單選取代號</div></div><div id="multi-chart-panel" class="multi-chart-panel"></div></section>
+</main>
+<div id="economic-calendar-modal-overlay" class="econ-modal-overlay"><div class="econ-modal" role="dialog" aria-modal="true" aria-labelledby="calendar-title"><div class="econ-modal-header"><span id="calendar-title">美國經濟日曆</span><button id="calendar-close" class="econ-modal-close" type="button" aria-label="關閉經濟日曆">×</button></div><div id="calendar-widget"></div><div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/economic-calendar/" rel="noopener nofollow" target="_blank">經濟日曆</a> 由 TradingView 提供</div></div></div>
 <script src="https://s3.tradingview.com/tv.js"></script>
 <script>
-(function() {
-    let chartWidget = null;
-    let currentIndex = 0;
-    let allTickerRows = [];
-    let currentSortStates = {};
-    let snapshot = null;
-    let meta = null;
-    let multiChartMode = false;
-    let defaultSymbol = 'QQQE';
-    var groupLabels = {'Indices':'市場指數','S&P Style ETFs':'標普風格 ETF','Sel Sectors':'精選板塊','EW Sectors':'等權重板塊','Industries':'產業','Countries':'國家市場'};
-    var sectorLabels = {'Technology':'科技','Information Technology':'資訊科技','Communication Services':'通訊服務','Consumer Discretionary':'非必需消費','Consumer Staples':'必需消費','Energy':'能源','Financials':'金融','Financial':'金融','Health Care':'醫療保健','Healthcare':'醫療保健','Industrials':'工業','Materials':'原材料','Real Estate':'房地產','Utilities':'公用事業','Unknown':'未分類'};
-    function groupLabel(name) { return groupLabels[name] || name; }
-    function sectorLabel(name) { return sectorLabels[name] || name; }
-    function safeGroupId(name) { return name.replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
-    function escapeHtml(s) {
-        if (!s) return '';
-        return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
-    function vizWidth(value, minVal, maxVal) {
-        if (value == null) return 0;
-        if (minVal >= maxVal) return 0;
-        if (value >= 0) {
-            if (maxVal <= 0) return 0;
-            return Math.min(100, Math.max(0, (value / maxVal) * 100));
-        }
-        if (minVal >= 0) return 0;
-        return Math.min(100, Math.max(0, (Math.abs(value) / Math.abs(minVal)) * 100));
-    }
-    function renderEvents(events) {
-        const el = document.getElementById('events-content');
-        if (!el) return;
-        if (!events || events.length === 0) {
-            el.innerHTML = '<div class="event-item">未來7日沒有高重要性的美國宏觀經濟事件。</div>';
-            return;
-        }
-        el.innerHTML = events.map(function(e) {
-            return '<div class="event-item"><span class="event-datetime">' + (e.date || '') + ' ' + (e.time || '') + '</span><span class="event-name"> · ' + (e.event || '') + '</span></div>';
-        }).join('');
-    }
-    function getGroupLabelClass(groupName, ticker) {
-        if (groupName === 'Industries' && meta && meta.Industries_COLORS && meta.Industries_COLORS[ticker]) return 'ticker-label-' + ticker;
-        var safe = groupName.replace(/\s+/g, '-').replace(/&/g, '-');
-        return 'ticker-label-' + safe;
-    }
-    function renderGroups() {
-        if (!snapshot || !snapshot.groups) {
-            document.getElementById('groups-container').innerHTML = '<div class="loading-msg">正在載入數據……</div>';
-            return;
-        }
-        var html = '';
-        var groupOrder = ['Indices', 'S&P Style ETFs', 'Sel Sectors', 'EW Sectors', 'Industries', 'Countries'];
-        for (var g = 0; g < groupOrder.length; g++) {
-            var groupName = groupOrder[g];
-            var rows = snapshot.groups[groupName];
-            if (!rows || rows.length === 0) continue;
-            var safeId = safeGroupId(groupName);
-            var ranges = (snapshot.column_ranges && snapshot.column_ranges[groupName]) || { daily: [-10,10], intra: [-10,10], '5d': [-20,20], '20d': [-30,30] };
-            html += '<div class="group-container" id="group-' + safeId + '">';
-            html += '<div class="group-header">';
-            var gnEsc = groupName.replace(/'/g, "\\'");
-            html += '<span class="group-header-title" onclick="scrollToGroup(\'' + gnEsc + '\')">' + groupLabel(groupName) + '</span>';
-            if (groupName === 'Industries' && meta && meta.SECTOR_COLORS) {
-                html += '<div class="legend" onclick="event.stopPropagation()">';
-                for (var s in meta.SECTOR_COLORS) html += '<span class="legend-item" style="background-color:' + meta.SECTOR_COLORS[s] + '">' + sectorLabel(s) + '</span>';
-                html += '</div>';
-            }
-            html += '<div class="group-header-actions" onclick="event.stopPropagation()">';
-            html += '<button type="button" class="group-chart-btn" data-group="' + gnEsc + '" onclick="toggleGroupChart(\'' + gnEsc + '\', this)">多圖模式</button>';
-            html += '</div></div>';
-            html += '<table class="ticker-table" data-group="' + escapeHtml(groupName) + '"><thead><tr>';
-            var th = function(key, label) { return '<th class="sortable" data-sort-by="' + key + '" title="點擊排序">' + label + '</th>'; };
-            html += th('symbol', '代號');
-            html += th('abc', '評級');
-            html += th('daily', '當日');
-            html += th('intra', '日內');
-            html += th('5d', '5日');
-            html += th('20d', '20日');
-            html += th('atr_pct', 'ATR%');
-            html += th('dist_sma50_atr', 'ATRx');
-            html += th('rs', '1月-VARS');
-            html += th('rs', 'VARS');
-            html += th('letf', '槓桿ETF');
-            html += '</tr></thead><tbody id="' + safeId + '-body">';
-            for (var i = 0; i < rows.length; i++) {
-                var r = rows[i];
-                var daily = r.daily, intra = r.intra, five = r['5d'], twenty = r['20d'];
-                var dailyW = vizWidth(daily, ranges.daily[0], ranges.daily[1]);
-                var intraW = vizWidth(intra, ranges.intra[0], ranges.intra[1]);
-                var fiveW = vizWidth(five, ranges['5d'][0], ranges['5d'][1]);
-                var twentyW = vizWidth(twenty, ranges['20d'][0], ranges['20d'][1]);
-                var dailyCl = daily != null ? (daily > 0 ? 'price-up' : (daily < 0 ? 'price-down' : '')) : '';
-                var intraCl = intra != null ? (intra > 0 ? 'price-up' : (intra < 0 ? 'price-down' : '')) : '';
-                var fiveCl = five != null ? (five > 0 ? 'price-up' : (five < 0 ? 'price-down' : '')) : '';
-                var twentyCl = twenty != null ? (twenty > 0 ? 'price-up' : (twenty < 0 ? 'price-down' : '')) : '';
-                var letf = (r.long && r.long.length) || (r.short && r.short.length) ? '1' : '0';
-                var abc = r.abc || '';
-                var rs = r.rs != null ? r.rs : 0;
-                var atrPct = r.atr_pct != null ? r.atr_pct : 0;
-                var dist = r.dist_sma50_atr != null ? r.dist_sma50_atr : 0;
-                var labelClass = getGroupLabelClass(groupName, r.ticker);
-                html += '<tr class="ticker-row" onclick="updateChart(\'' + r.ticker + '\', this)" data-symbol="' + r.ticker + '" data-group="' + groupName.replace(/"/g, '&quot;') + '" data-daily="' + (daily != null ? daily : 0) + '" data-intra="' + (intra != null ? intra : 0) + '" data-5d="' + (five != null ? five : 0) + '" data-20d="' + (twenty != null ? twenty : 0) + '" data-atr_pct="' + atrPct + '" data-dist_sma50_atr="' + dist + '" data-rs="' + rs + '" data-abc="' + abc + '" data-letf="' + letf + '" data-index="' + i + '">';
-                html += '<td><span class="ticker-label ' + labelClass + '">' + r.ticker + '</span></td>';
-                html += '<td>' + (abc ? '<span class="abc-rating abc-' + abc.toLowerCase() + '">' + abc + '</span>' : '-') + '</td>';
-                html += '<td class="' + dailyCl + '">' + (daily != null ? '<div class="value-visualization"><div class="value-bar ' + (daily >= 0 ? 'positive' : 'negative') + '" style="width:' + dailyW + '%"></div><span class="value-text">' + (daily >= 0 ? '+' : '') + daily.toFixed(2) + '%</span></div>' : '無資料') + '</td>';
-                html += '<td class="' + intraCl + '">' + (intra != null ? '<div class="value-visualization"><div class="value-bar ' + (intra >= 0 ? 'positive' : 'negative') + '" style="width:' + intraW + '%"></div><span class="value-text">' + (intra >= 0 ? '+' : '') + intra.toFixed(2) + '%</span></div>' : '無資料') + '</td>';
-                html += '<td class="' + fiveCl + '">' + (five != null ? '<div class="value-visualization"><div class="value-bar ' + (five >= 0 ? 'positive' : 'negative') + '" style="width:' + fiveW + '%"></div><span class="value-text">' + (five >= 0 ? '+' : '') + five.toFixed(2) + '%</span></div>' : '無資料') + '</td>';
-                html += '<td class="' + twentyCl + '">' + (twenty != null ? '<div class="value-visualization"><div class="value-bar ' + (twenty >= 0 ? 'positive' : 'negative') + '" style="width:' + twentyW + '%"></div><span class="value-text">' + (twenty >= 0 ? '+' : '') + twenty.toFixed(2) + '%</span></div>' : '無資料') + '</td>';
-                html += '<td>' + (r.atr_pct != null ? r.atr_pct.toFixed(1) + '%' : '無資料') + '</td>';
-                html += '<td>' + (r.dist_sma50_atr != null ? r.dist_sma50_atr.toFixed(2) : '無資料') + '</td>';
-                html += '<td>' + (r.rs != null ? Math.round(r.rs) + '%' : '無資料') + '</td>';
-                html += '<td>' + (r.rs_chart ? '<img src="' + r.rs_chart + '" class="rs-chart" alt="相對強度">' : '無資料') + '</td>';
-                html += '<td class="etf-list">';
-                if (r.long && r.long.length) html += r.long.map(function(etf){ return '<span class="long-etf" onclick="event.stopPropagation();updateChart(\'' + etf + '\')">' + etf + '</span>'; }).join(', ');
-                if (r.short && r.short.length) { if (r.long && r.long.length) html += '<br>'; html += r.short.map(function(etf){ return '<span class="short-etf" onclick="event.stopPropagation();updateChart(\'' + etf + '\')">' + etf + '</span>'; }).join(', '); }
-                if (!(r.long && r.long.length) && !(r.short && r.short.length)) html += '-';
-                html += '</td></tr>';
-            }
-            html += '</tbody></table></div>';
-        }
-        document.getElementById('groups-container').innerHTML = html;
-        if (meta && meta.Industries_COLORS) {
-            var style = document.createElement('style');
-            var css = '';
-            for (var t in meta.Industries_COLORS) css += '.ticker-label-' + t + '{background-color:' + meta.Industries_COLORS[t] + ';color:white} ';
-            style.textContent = css;
-            document.head.appendChild(style);
-        }
-        initApp();
-    }
-    function buildMultiChartForGroup(groupName) {
-        var panel = document.getElementById('multi-chart-panel');
-        if (!panel) return;
-        panel.innerHTML = '';
-        var gc = document.getElementById('group-' + safeGroupId(groupName));
-        if (!gc) return;
-        var table = gc.querySelector('table.ticker-table');
-        if (!table) return;
-        var rows = [].slice.call(table.querySelectorAll('.ticker-row'));
-        if (!rows.length) return;
-        var block = document.createElement('div');
-        var title = document.createElement('div');
-        title.className = 'multi-group-title';
-        title.textContent = groupLabel(groupName);
-        var grid = document.createElement('div');
-        grid.className = 'multi-chart-grid';
-        rows.forEach(function(row) {
-            var sym = (row.getAttribute('data-symbol') || '').trim();
-            if (!sym) return;
-            var wrap = document.createElement('div');
-            wrap.className = 'tradingview-widget-container';
-            wrap.style.height = '325px';
-            wrap.style.width = '100%';
-            wrap.innerHTML = '<div class="tradingview-widget-container__widget" style="height:100%;width:100%;border:1px solid rgba(255,255,255,0.06);border-radius:4px;"></div>';
-            var script = document.createElement('script');
-            script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
-            script.async = true;
-            script.textContent = JSON.stringify({
-                allow_symbol_change:true,calendar:false,details:false,hide_side_toolbar:true,hide_top_toolbar:false,hide_legend:true,hide_volume:true,hotlist:false,interval:'D',locale:'zh_TW',save_image:false,style:'1',symbol:sym,theme:'dark',timezone:'America/Toronto',backgroundColor:'#1a1a1a',gridColor:'rgba(242, 242, 242, 0.06)',watchlist:[],withdateranges:false,compareSymbols:[],studies:['STD;MA%Ribbon'],autosize:true
-            });
-            wrap.querySelector('.tradingview-widget-container__widget').appendChild(script);
-            grid.appendChild(wrap);
-        });
-        block.appendChild(title);
-        block.appendChild(grid);
-        panel.appendChild(block);
-    }
-    window.openGroupMultiChart = function(groupName) {
-        multiChartMode = true;
-        var singlePanel = document.getElementById('single-chart-panel');
-        var multiPanel = document.getElementById('multi-chart-panel');
-        if (chartWidget) { chartWidget.remove(); chartWidget = null; }
-        if (singlePanel) singlePanel.style.display = 'none';
-        if (multiPanel) multiPanel.style.display = 'block';
-        buildMultiChartForGroup(groupName);
-    };
-    window.openSingleChart = function() {
-        multiChartMode = false;
-        var singlePanel = document.getElementById('single-chart-panel');
-        var multiPanel = document.getElementById('multi-chart-panel');
-        if (singlePanel) singlePanel.style.display = 'flex';
-        if (multiPanel) multiPanel.style.display = 'none';
-        if (!chartWidget) {
-            var active = document.querySelector('.ticker-row.active');
-            var sym = active ? active.getAttribute('data-symbol') : (defaultSymbol || 'QQQE');
-            initChart(sym || 'QQQE');
-        }
-    };
-    function updateGroupChartButtons(activeGroup) {
-        var btns = document.querySelectorAll('.group-header-actions .group-chart-btn');
-        btns.forEach(function(btn) {
-            var g = btn.getAttribute('data-group');
-            if (activeGroup && g === activeGroup) btn.textContent = '單圖模式';
-            else btn.textContent = '多圖模式';
-        });
-    }
-    window.toggleGroupChart = function(groupName, btnEl) {
-        if (!multiChartMode) { openGroupMultiChart(groupName); updateGroupChartButtons(groupName); }
-        else { openSingleChart(); updateGroupChartButtons(null); }
-    };
-    function initChart(symbol) {
-        if (chartWidget) { chartWidget.remove(); chartWidget = null; }
-        chartWidget = new TradingView.widget({
-            allow_symbol_change:true,calendar:false,details:true,hide_side_toolbar:false,hide_top_toolbar:false,hide_legend:false,hide_volume:false,hotlist:false,interval:'D',locale:'zh_TW',save_image:false,style:'1',symbol:symbol,theme:'dark',timezone:'America/Toronto',toolbar_bg:'#1a1a1a',backgroundColor:'#1a1a1a',gridColor:'rgba(255,255,255,0.1)',watchlist:[],withdateranges:true,studies:['STD;MA%Ribbon'],compareSymbols:[{symbol:'AMEX:SPY',position:'NewPane'}],autosize:true,enable_publishing:false,container_id:'tradingview-chart'
-        });
-    }
-    window.updateChart = function(symbol, element) {
-        allTickerRows.forEach(function(row) { row.classList.remove('active'); });
-        if (element) {
-            element.classList.add('active');
-            currentIndex = allTickerRows.indexOf(element);
-        } else {
-            var row = [].slice.call(document.querySelectorAll('.ticker-row')).filter(function(r) { return r.getAttribute('data-symbol') === symbol; })[0];
-            if (row) { row.classList.add('active'); currentIndex = allTickerRows.indexOf(row); }
-        }
-        initChart(symbol);
-        var activeRow = document.querySelector('.ticker-row.active');
-        if (activeRow) activeRow.scrollIntoView({ behavior:'smooth',block:'nearest' });
-    };
-    window.scrollToGroup = function(groupName) {
-        var el = document.getElementById('group-' + safeGroupId(groupName));
-        if (el) el.scrollIntoView({behavior:'smooth'});
-    };
-    window.openEconomicCalendar = function() {
-        var ov = document.getElementById('economic-calendar-modal-overlay');
-        if (ov) ov.style.display = 'flex';
-    };
-    window.closeEconomicCalendar = function(ev) {
-        if (ev) ev.preventDefault();
-        var ov = document.getElementById('economic-calendar-modal-overlay');
-        if (ov) ov.style.display = 'none';
-    };
-    window.sortGroup = function(group, sortBy) {
-        var tables = document.querySelectorAll('.ticker-table');
-        var table = null;
-        for (var t = 0; t < tables.length; t++) {
-            if (tables[t].getAttribute('data-group') === group) { table = tables[t]; break; }
-        }
-        if (!table) return;
-        var tbody = table.querySelector('tbody');
-        var rows = [].slice.call(tbody.querySelectorAll('.ticker-row'));
-        var state = currentSortStates[group] || {sortBy:null,direction:1,count:0};
-        currentSortStates[group] = state;
-        table.querySelectorAll('th, td').forEach(function(el) { el.classList.remove('sort-asc','sort-desc','sorted-column'); });
-        if (state.sortBy === sortBy) {
-            state.count++;
-            if (state.count >= 3) {
-                state.sortBy = null; state.direction = 1; state.count = 0;
-                rows.sort(function(a,b) { return parseInt(a.getAttribute('data-index')) - parseInt(b.getAttribute('data-index')); });
-                tbody.innerHTML = ''; rows.forEach(function(r) { tbody.appendChild(r); });
-                updateAllTickerRows(); return;
-            }
-        } else state.count = 1;
-        state.sortBy = sortBy;
-        if (state.count === 2) state.direction *= -1; else state.direction = 1;
-        var colMap = {symbol:0,abc:1,daily:2,intra:3,'5d':4,'20d':5,atr_pct:6,dist_sma50_atr:7,rs:8,letf:10};
-        var hi = colMap[sortBy] !== undefined ? colMap[sortBy] : 9;
-        var headerIndices = sortBy === 'rs' ? [8,9] : [hi];
-        headerIndices.forEach(function(idx) {
-            var h = table.querySelectorAll('th')[idx];
-            if (h) h.classList.add(state.direction === 1 ? 'sort-asc' : 'sort-desc','sorted-column');
-        });
-        rows.forEach(function(row) {
-            var cells = row.querySelectorAll('td');
-            headerIndices.forEach(function(idx) { if (cells[idx]) cells[idx].classList.add('sorted-column'); });
-        });
-        var tickerToSector = meta && meta.TICKER_TO_SECTOR ? meta.TICKER_TO_SECTOR : {};
-        var sectorOrder = meta && meta.SECTOR_ORDER ? meta.SECTOR_ORDER : [];
-        function sectorIndex(s) { var i = sectorOrder.indexOf(s); return i >= 0 ? i : sectorOrder.length; }
-        rows.sort(function(a,b) {
-            var aVal,bVal;
-            if (sortBy === 'symbol') {
-                if (group === 'Industries') {
-                    var aT = a.getAttribute('data-symbol'), bT = b.getAttribute('data-symbol');
-                    var aS = tickerToSector[aT] || 'Unknown', bS = tickerToSector[bT] || 'Unknown';
-                    if (sectorIndex(aS) !== sectorIndex(bS)) return (sectorIndex(aS) - sectorIndex(bS)) * state.direction;
-                    return aT.toLowerCase().localeCompare(bT.toLowerCase()) * state.direction;
-                }
-                return a.getAttribute('data-symbol').toLowerCase().localeCompare(b.getAttribute('data-symbol').toLowerCase()) * state.direction;
-            } else if (sortBy === 'abc') {
-                return (a.getAttribute('data-abc') || '').localeCompare(b.getAttribute('data-abc') || '') * state.direction;
-            } else if (sortBy === 'letf') {
-                return (parseInt(a.getAttribute('data-letf') || '0') - parseInt(b.getAttribute('data-letf') || '0')) * state.direction;
-            } else {
-                return (parseFloat(a.getAttribute('data-' + sortBy)) - parseFloat(b.getAttribute('data-' + sortBy))) * state.direction;
-            }
-        });
-        tbody.innerHTML = ''; rows.forEach(function(r) { tbody.appendChild(r); });
-        updateAllTickerRows();
-        var ar = document.querySelector('.ticker-row.active');
-        if (ar) currentIndex = allTickerRows.indexOf(ar);
-    };
-    function updateAllTickerRows() {
-        allTickerRows = [];
-        document.querySelectorAll('.ticker-table').forEach(function(table) {
-            [].slice.call(table.querySelectorAll('.ticker-row')).forEach(function(row) { allTickerRows.push(row); });
-        });
-    }
-    function initApp() {
-        allTickerRows = [].slice.call(document.querySelectorAll('.ticker-row'));
-        document.querySelectorAll('.ticker-table').forEach(function(table) {
-            var g = table.getAttribute('data-group');
-            currentSortStates[g] = {sortBy:null,direction:1,count:0};
-        });
-        var listEl = document.querySelector('.ticker-list');
-        if (listEl && !listEl._sortDelegate) {
-            listEl._sortDelegate = true;
-            listEl.addEventListener('click',function(ev) {
-                var th = ev.target.closest('th.sortable');
-                if (!th) return;
-                var table = th.closest('table.ticker-table');
-                if (!table) return;
-                var group = table.getAttribute('data-group');
-                var sortBy = th.getAttribute('data-sort-by');
-                if (group && sortBy) window.sortGroup(group,sortBy);
-            });
-        }
-        defaultSymbol = meta && meta.default_symbol ? meta.default_symbol : 'QQQE';
-        initChart(defaultSymbol);
-        if (allTickerRows.length > 0) allTickerRows[0].classList.add('active');
-        document.addEventListener('keydown',function(e) {
-            if (e.key === 'ArrowDown') { e.preventDefault(); if (currentIndex < allTickerRows.length - 1) { currentIndex++; updateChart(allTickerRows[currentIndex].getAttribute('data-symbol'),allTickerRows[currentIndex]); } }
-            if (e.key === 'ArrowUp') { e.preventDefault(); if (currentIndex > 0) { currentIndex--; updateChart(allTickerRows[currentIndex].getAttribute('data-symbol'),allTickerRows[currentIndex]); } }
-        });
-    }
-    function loadData() {
-        Promise.all([
-            fetch('data/snapshot.json').then(function(res) { return res.ok ? res.json() : null; }).catch(function() { return null; }),
-            fetch('data/events.json').then(function(res) { return res.ok ? res.json() : []; }).catch(function() { return []; }),
-            fetch('data/meta.json').then(function(res) { return res.ok ? res.json() : null; }).catch(function() { return null; })
-        ]).then(function(results) {
-            snapshot = results[0];
-            var events = results[1];
-            meta = results[2];
-            renderEvents(events);
-            renderGroups();
-        }).catch(function() {
-            document.getElementById('groups-container').innerHTML = '<div class="loading-msg">正在載入數據……（請執行 scripts/build_data.py，或等待 GitHub Actions 更新）</div>';
-        });
-    }
-    loadData();
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id);};
+var snapshot=null,meta={},chartWidget=null,selected='QQQE',activeRow=null,multiGroup=null,sortStates={},calendarReady=false;
+var order=['Indices','S&P Style ETFs','Sel Sectors','EW Sectors','Industries','Countries'];
+var labels={'Indices':'市場指數','S&P Style ETFs':'標普風格 ETF','Sel Sectors':'精選板塊','EW Sectors':'等權重板塊','Industries':'產業','Countries':'國家市場'};
+var sectors={'Information Technology':'資訊科技','Technology':'科技','Industrials':'工業','Emerging Markets':'新興市場','Consumer Discretionary':'非必需消費','Health Care':'醫療保健','Healthcare':'醫療保健','Financials':'金融','Energy':'能源','Communication Services':'通訊服務','Real Estate':'房地產','Commodities':'大宗商品','Materials':'原材料','Utilities':'公用事業','Consumer Staples':'必需消費','Broad Market':'整體市場','Unknown':'未分類'};
+var columns=[['symbol','代號','股票或 ETF 代號；點擊此欄排序。'],['abc','評級','原有 ABC 趨勢評級：A 為 EMA10 > EMA20 > SMA50；B 為多空交錯；C 為下降趨勢。'],['daily','當日','當日變動，沿用原始快照的計算口徑。'],['intra','日內','日內變動，沿用原始快照的計算口徑；並非即時報價。'],['5d','5日','原有5個交易日價格變動。'],['20d','20日','原有20個交易日價格變動。'],['atr_pct','ATR%','原始數據提供的 ATR 百分比。'],['dist_sma50_atr','ATRx','與50日簡單移動平均線的距離，以 ATR 倍數表示。'],['rs','1月-VARS','最近21日相對 SPY 的波動調整相對強度位置（0–100%），沿用原有計算。'],['rs','VARS','原有相對強度走勢圖；按此欄會依同一個 VARS 數值排序。'],['letf','槓桿ETF','原有名單中的做多／反向 ETF。綠色為做多，紅色為反向；不是交易建議。']];
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function label(g){return labels[g]||g;}
+function gid(g){return 'group-'+g.replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
+function color(c){return /^#[0-9a-f]{3,8}$/i.test(c||'')?c:'#34425a';}
+function num(v){return v!=null&&Number.isFinite(Number(v));}
+function tvUrl(sym){return 'https://www.tradingview.com/chart/?symbol='+encodeURIComponent(sym);}
+function visibleRows(){return Array.from(document.querySelectorAll('.ticker-row')).filter(function(r){return !r.hidden&&!r.closest('.group-container').hidden;});}
+function barWidth(v,min,max){if(v==null||min>=max)return 0;if(v>=0){if(max<=0)return 0;return Math.min(100,Math.max(0,v/max*100));}if(min>=0)return 0;return Math.min(100,Math.max(0,Math.abs(v)/Math.abs(min)*100));}
+function pct(v,range){if(!num(v))return '<span class="missing">—</span>';v=Number(v);return '<div class="value-visualization"><div class="value-bar '+(v>=0?'positive':'negative')+'" style="width:'+barWidth(v,range[0],range[1])+'%"></div><span class="value-text">'+(v>=0?'+':'')+v.toFixed(2)+'%</span></div>';}
+function rowHtml(r,i,g,ranges){var values={symbol:r.ticker,abc:r.abc||'',daily:r.daily,intra:r.intra,'5d':r['5d'],'20d':r['20d'],atr_pct:r.atr_pct,dist_sma50_atr:r.dist_sma50_atr,rs:r.rs,letf:(r.long&&r.long.length)||(r.short&&r.short.length)?1:0};var attrs='';Object.keys(values).forEach(function(k){attrs+=' data-'+k+'="'+esc(values[k])+'"';});var c=g==='Industries'&&meta.Industries_COLORS?meta.Industries_COLORS[r.ticker]:null;var html='<tr class="ticker-row" data-index="'+i+'"'+attrs+'><td><span class="ticker-label" style="background:'+color(c)+'">'+esc(r.ticker)+'</span></td><td>';
+var abc=String(r.abc||'');html+=abc?'<span class="abc-rating '+({'A':'abc-a','B':'abc-b','C':'abc-c'}[abc]||'')+'">'+esc(abc)+'</span>':'—';html+='</td>';
+['daily','intra','5d','20d'].forEach(function(k){var v=r[k];html+='<td class="'+(num(v)?(Number(v)>0?'price-up':Number(v)<0?'price-down':''):'')+'">'+pct(v,ranges[k])+'</td>';});
+html+='<td>'+ (num(r.atr_pct)?Number(r.atr_pct).toFixed(1)+'%':'—')+'</td><td>'+(num(r.dist_sma50_atr)?Number(r.dist_sma50_atr).toFixed(2):'—')+'</td><td>'+(num(r.rs)?Math.round(Number(r.rs))+'%':'—')+'</td><td>';
+var path=String(r.rs_chart||'');html+=path&&/^(?:\.\/)?data\/[a-zA-Z0-9_./-]+$/.test(path)?'<img loading="lazy" src="'+esc(path)+'" class="rs-chart" alt="相對強度走勢">':'—';html+='</td><td>';
+var longs=Array.isArray(r.long)?r.long:[],shorts=Array.isArray(r.short)?r.short:[];
+function etfs(arr,cls){return arr.map(function(s){return '<button type="button" class="etf-link '+cls+'" data-etf="'+esc(s)+'">'+esc(s)+'</button>';}).join(', ');}
+html+=etfs(longs,'long-etf')+(longs.length&&shorts.length?'<br>':'')+etfs(shorts,'short-etf');if(!longs.length&&!shorts.length)html+='—';return html+'</td></tr>';}
+function render(){var html='',nav='';order.forEach(function(g){var rows=snapshot.groups[g];if(!Array.isArray(rows)||!rows.length)return;var fallback={daily:[-10,10],intra:[-10,10],'5d':[-20,20],'20d':[-30,30]};var ranges=Object.assign(fallback,(snapshot.column_ranges||{})[g]||{});nav+='<button type="button" data-jump="'+esc(g)+'">'+esc(label(g))+'</button>';html+='<section class="group-container" id="'+gid(g)+'" data-group="'+esc(g)+'"><div class="group-header"><div><span class="group-title">'+esc(label(g))+'</span><span class="group-count"></span></div><button type="button" class="group-chart-btn" data-multi="'+esc(g)+'">多圖模式</button>';
+if(g==='Industries'&&meta.SECTOR_COLORS){html+='<div class="legend">';Object.keys(meta.SECTOR_COLORS).forEach(function(s){html+='<span class="legend-item" style="background:'+color(meta.SECTOR_COLORS[s])+'">'+esc(sectors[s]||s)+'</span>';});html+='</div>';}
+html+='</div><div class="table-scroll"><table class="ticker-table" data-group="'+esc(g)+'"><thead><tr>';columns.forEach(function(c){html+='<th scope="col" title="'+esc(c[2])+' 點擊三次：升序、降序、還原。"><button type="button" data-sort="'+c[0]+'">'+c[1]+'</button></th>';});html+='</tr></thead><tbody>';rows.forEach(function(r,i){html+=rowHtml(r,i,g,ranges);});html+='</tbody></table></div></section>';});$('groups-container').innerHTML=html;$('category-nav').innerHTML=nav;$('column-guide').innerHTML=columns.map(function(c){return '<dt>'+c[1]+'</dt><dd>'+esc(c[2])+'</dd>';}).join('');filterRows();selected=meta.default_symbol||'QQQE';activeRow=Array.from(document.querySelectorAll('.ticker-row')).find(function(r){return r.dataset.symbol===selected;})||null;if(activeRow)activeRow.classList.add('active');setSelected(selected);initChart(selected);}
+function setSelected(sym){selected=sym;$('selected-symbol').textContent=sym;$('tv-open').href=tvUrl(sym);$('tv-open').setAttribute('aria-label','在 TradingView 開啟 '+sym);}
+function initChart(sym){if(chartWidget){chartWidget.remove();chartWidget=null;}$('tradingview-chart').innerHTML='';if(!window.TradingView){$('tradingview-chart').innerHTML='<div class="loading-msg error">圖表服務未能載入。可使用上方連結在 TradingView 開啟。</div>';return;}try{chartWidget=new TradingView.widget({allow_symbol_change:true,calendar:false,details:true,hide_side_toolbar:false,hide_top_toolbar:false,hide_legend:false,hide_volume:false,hotlist:false,interval:'D',locale:'zh_TW',save_image:false,style:'1',symbol:sym,theme:'dark',timezone:'America/Toronto',toolbar_bg:'#11151d',backgroundColor:'#11151d',gridColor:'rgba(255,255,255,0.1)',watchlist:[],withdateranges:true,studies:['STD;MA%Ribbon'],compareSymbols:[{symbol:'AMEX:SPY',position:'NewPane'}],autosize:true,enable_publishing:false,container_id:'tradingview-chart'});}catch(e){$('tradingview-chart').innerHTML='<div class="loading-msg error">暫時未能建立圖表，請重新整理或使用 TradingView 連結。</div>';}}
+function selectSymbol(sym,row){if(activeRow)activeRow.classList.remove('active');activeRow=row||visibleRows().find(function(r){return r.dataset.symbol===sym;})||null;if(activeRow)activeRow.classList.add('active');setSelected(sym);if(multiGroup!==null)singleChart();else initChart(sym);if(activeRow)activeRow.scrollIntoView({block:'nearest',inline:'nearest'});}
+function updateButtons(){document.querySelectorAll('[data-multi]').forEach(function(b){b.textContent=b.dataset.multi===multiGroup?'單圖模式':'多圖模式';});$('single-mode').hidden=multiGroup===null;}
+function singleChart(){multiGroup=null;$('single-chart-panel').style.display='flex';$('multi-chart-panel').style.display='none';$('multi-chart-panel').replaceChildren();$('chart-mode').textContent='單圖模式';updateButtons();initChart(selected);}
+function multiChart(g){multiGroup=g;if(chartWidget){chartWidget.remove();chartWidget=null;}$('single-chart-panel').style.display='none';$('multi-chart-panel').style.display='block';$('chart-mode').textContent=label(g)+' · 多圖模式（目前搜尋結果）';updateButtons();buildMulti();}
+function buildMulti(){var panel=$('multi-chart-panel');panel.replaceChildren();var section=$(gid(multiGroup));var rows=section?Array.from(section.querySelectorAll('.ticker-row')).filter(function(r){return !r.hidden;}):[];if(!rows.length){panel.innerHTML='<div class="loading-msg">此分類沒有符合搜尋條件的標的。</div>';return;}var grid=document.createElement('div');grid.className='multi-chart-grid';rows.forEach(function(row){var sym=row.dataset.symbol;var card=document.createElement('article');card.className='chart-card';var bar=document.createElement('div');bar.className='chart-card-bar';var name=document.createElement('span');name.textContent=sym;var link=document.createElement('a');link.textContent='在 TradingView 開啟';link.href=tvUrl(sym);link.target='_blank';link.rel='noopener noreferrer';bar.append(name,link);var wrap=document.createElement('div');wrap.className='chart-card-widget tradingview-widget-container';var inner=document.createElement('div');inner.className='tradingview-widget-container__widget';inner.style.height='100%';wrap.append(inner);var script=document.createElement('script');script.src='https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';script.async=true;script.textContent=JSON.stringify({allow_symbol_change:true,calendar:false,details:false,hide_side_toolbar:true,hide_top_toolbar:false,hide_legend:true,hide_volume:true,hotlist:false,interval:'D',locale:'zh_TW',save_image:false,style:'1',symbol:sym,theme:'dark',timezone:'America/Toronto',backgroundColor:'#11151d',gridColor:'rgba(242,242,242,0.06)',watchlist:[],withdateranges:false,compareSymbols:[],studies:['STD;MA%Ribbon'],autosize:true});wrap.append(script);card.append(bar,wrap);grid.append(card);});panel.append(grid);}
+function filterRows(){var q=$('search').value.trim().toUpperCase(),shown=0,total=0;document.querySelectorAll('.group-container').forEach(function(section){var count=0;section.querySelectorAll('.ticker-row').forEach(function(row){total++;row.hidden=!row.dataset.symbol.toUpperCase().includes(q);if(!row.hidden){count++;shown++;}});section.hidden=count===0;section.querySelector('.group-count').textContent=count+' 檔';document.querySelectorAll('[data-jump]').forEach(function(b){if(b.dataset.jump===section.dataset.group)b.hidden=count===0;});});$('result-count').textContent='顯示 '+shown+' / '+total+' 筆分類項目';$('no-results').hidden=!snapshot||shown!==0;if(multiGroup!==null)buildMulti();}
+function sortTable(table,key){var group=table.dataset.group,state=sortStates[group]||{key:null,count:0};state.count=state.key===key?(state.count+1)%3:1;state.key=state.count?key:null;sortStates[group]=state;var dir=state.count===2?-1:1,rows=Array.from(table.tBodies[0].rows);var sectorOrder=meta.SECTOR_ORDER||[],map=meta.TICKER_TO_SECTOR||{};function sectorIndex(t){var i=sectorOrder.indexOf(map[t]||'Unknown');return i<0?sectorOrder.length:i;}rows.sort(function(a,b){if(!state.count)return Number(a.dataset.index)-Number(b.dataset.index);var av=a.getAttribute('data-'+key),bv=b.getAttribute('data-'+key);if(key==='symbol'){if(group==='Industries'){var d=sectorIndex(av)-sectorIndex(bv);if(d)return d*dir;}return av.toLowerCase().localeCompare(bv.toLowerCase())*dir;}if(key==='abc')return av.localeCompare(bv)*dir;if(!num(av)||av==='')return !num(bv)||bv===''?0:1;if(!num(bv)||bv==='')return -1;return (Number(av)-Number(bv))*dir;});rows.forEach(function(r){table.tBodies[0].append(r);});table.querySelectorAll('th,td').forEach(function(e){e.classList.remove('sorted-column','sort-asc','sort-desc');e.removeAttribute('aria-sort');});if(state.count){columns.forEach(function(c,i){if(c[0]!==key)return;var h=table.tHead.rows[0].cells[i];h.classList.add('sorted-column',dir===1?'sort-asc':'sort-desc');h.setAttribute('aria-sort',dir===1?'ascending':'descending');rows.forEach(function(r){r.cells[i].classList.add('sorted-column');});});}if(multiGroup===group)buildMulti();}
+$('groups-container').addEventListener('click',function(e){var sort=e.target.closest('[data-sort]');if(sort){sortTable(sort.closest('table'),sort.dataset.sort);return;}var multi=e.target.closest('[data-multi]');if(multi){if(multiGroup===multi.dataset.multi)singleChart();else multiChart(multi.dataset.multi);return;}var etf=e.target.closest('[data-etf]');if(etf){selectSymbol(etf.dataset.etf);return;}var row=e.target.closest('.ticker-row');if(row)selectSymbol(row.dataset.symbol,row);});
+$('category-nav').addEventListener('click',function(e){var b=e.target.closest('[data-jump]');if(b){var section=$(gid(b.dataset.jump));if(section)section.scrollIntoView({behavior:'smooth',block:'start'});}});
+var searchTimer;$('search').addEventListener('input',function(){clearTimeout(searchTimer);searchTimer=setTimeout(filterRows,220);});$('clear-search').onclick=function(){clearTimeout(searchTimer);$('search').value='';filterRows();$('search').focus();};$('single-mode').onclick=singleChart;
+function closeCalendar(){$('economic-calendar-modal-overlay').style.display='none';$('calendar-open').focus();}
+$('calendar-open').onclick=function(){$('economic-calendar-modal-overlay').style.display='flex';$('calendar-close').focus();if(!calendarReady){calendarReady=true;var w=$('calendar-widget');w.innerHTML='<div class="tradingview-widget-container__widget"></div>';var s=document.createElement('script');s.src='https://s3.tradingview.com/external-embedding/embed-widget-events.js';s.async=true;s.textContent=JSON.stringify({colorTheme:'dark',isTransparent:false,locale:'zh_TW',countryFilter:'us',importanceFilter:'-1,0,1',width:'100%',height:550});w.append(s);}};$('calendar-close').onclick=closeCalendar;$('economic-calendar-modal-overlay').onclick=function(e){if(e.target===this)closeCalendar();};
+document.addEventListener('keydown',function(e){var modal=$('economic-calendar-modal-overlay');if(modal.style.display==='flex'){if(e.key==='Escape'){e.preventDefault();closeCalendar();}if(e.key==='Tab'){var items=Array.from(modal.querySelectorAll('button,a[href]'));var first=items[0],last=items[items.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}return;}if(e.target.closest('input,textarea,select,button,a,summary,[contenteditable="true"],#splitter'))return;if(e.key!=='ArrowDown'&&e.key!=='ArrowUp')return;var rows=visibleRows();if(!rows.length)return;e.preventDefault();var i=rows.indexOf(activeRow);i=i<0?0:Math.max(0,Math.min(rows.length-1,i+(e.key==='ArrowDown'?1:-1)));selectSymbol(rows[i].dataset.symbol,rows[i]);});
+var split=$('splitter'),list=document.querySelector('.ticker-list');function setWidth(w){var max=Math.max(380,window.innerWidth-370);w=Math.round(Math.max(380,Math.min(max,w)));document.documentElement.style.setProperty('--left',w+'px');split.setAttribute('aria-valuenow',w);split.setAttribute('aria-valuemax',max);}
+split.addEventListener('pointerdown',function(e){if(e.button!==0)return;e.preventDefault();split.setPointerCapture(e.pointerId);document.body.classList.add('resizing');});split.addEventListener('pointermove',function(e){if(document.body.classList.contains('resizing'))setWidth(e.clientX);});function stopResize(){document.body.classList.remove('resizing');}split.addEventListener('pointerup',stopResize);split.addEventListener('pointercancel',stopResize);split.addEventListener('lostpointercapture',stopResize);split.addEventListener('keydown',function(e){if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();setWidth(list.getBoundingClientRect().width+(e.key==='ArrowRight'?30:-30));}});window.addEventListener('resize',function(){if(window.innerWidth>1050)setWidth(list.getBoundingClientRect().width);});if(window.innerWidth>1050)setWidth(list.getBoundingClientRect().width);
+async function jsonFile(path){var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},15000);try{var res=await fetch(path,{signal:controller.signal,cache:'no-cache'});if(!res.ok)throw new Error('HTTP '+res.status);return await res.json();}finally{clearTimeout(timer);}}
+async function loadData(){$('status').textContent='正在載入數據……';try{var results=await Promise.all([jsonFile('data/snapshot.json'),jsonFile('data/meta.json').catch(function(){return {};})]);snapshot=results[0];meta=results[1]||{};if(!snapshot||!snapshot.groups||typeof snapshot.groups!=='object'||!Object.values(snapshot.groups).some(function(r){return Array.isArray(r)&&r.length;}))throw new Error('缺少分類數據');render();$('status').textContent='數據已載入 · 每日快照，非即時行情';}catch(e){snapshot=null;$('status').textContent='數據載入失敗';$('result-count').textContent='暫無可用數據';$('groups-container').innerHTML='<div class="loading-msg error">未能讀取儀表盤數據。請稍後重試；若持續失敗，請檢查 GitHub Actions 更新結果。<br><button type="button" id="retry-load">重新載入</button></div>';$('retry-load').onclick=loadData;}}
+loadData();
 })();
 </script>
 </body>
