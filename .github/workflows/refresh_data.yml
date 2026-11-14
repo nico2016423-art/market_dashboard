@@ -1,39 +1,73 @@
-# Refresh dashboard data daily and commit so GitHub Pages serves updated JSON/charts.
 name: Refresh dashboard data
-
 on:
   schedule:
-    - cron: '20 20 * * 1-5'
-  workflow_dispatch: # Allow manual run
-
+    - cron: '50 22 * * 1-5'
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - 'scripts/build_srm.py'
+      - 'scripts/build_macro.py'
+      - 'scripts/build_data.py'
+      - '.github/workflows/refresh_data.yml'
+permissions:
+  contents: write
+concurrency:
+  group: market-data-refresh
+  cancel-in-progress: false
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     steps:
-      - name: Checkout
+      - name: Checkout latest main
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
+          ref: main
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
-      - name: Install dependencies
+      - name: Install market data dependencies
+        run: python -m pip install yfinance pandas numpy
+      - name: Generate SRM and macro snapshots
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Generate data
-        run: |
-          python scripts/build_data.py --out-dir data
+          python scripts/build_srm.py
+          python scripts/build_macro.py
         env:
           TZ: UTC
-
-      - name: Commit and push data
+      - name: Validate snapshots before replacing saved data
         run: |
+          python - <<'PY'
+          import json
+          import math
+          from pathlib import Path
+          from datetime import date, datetime, timezone
+          s=json.loads(Path('data/srm.json').read_text())
+          m=json.loads(Path('data/macro.json').read_text())
+          assert s.get('as_of'), 'SPY date missing; keep previous saved snapshots'
+          age=(datetime.now(timezone.utc).date()-date.fromisoformat(s['as_of'])).days
+          assert 0<=age<=7, 'SPY date is outside allowed freshness range'
+          assert s['as_of']==m.get('as_of'), 'SRM/macro benchmark dates differ; keep previous saved snapshots'
+          rows=[r for group in s['groups'].values() for r in group]
+          valid=[r for r in rows if r.get('date')==s['as_of'] and isinstance(r.get('daily'),(int,float)) and math.isfinite(r['daily'])]
+          assert rows and len(valid)/len(rows)>=0.8, 'Less than 80% same-date valid rows; keep previous saved snapshots'
+          assert len(s['groups'].get('SRM Industries',[]))==19, 'SRM19 universe incomplete'
+          macros=m.get('macros',[])
+          good=[r for r in macros if r.get('date')==s['as_of'] and isinstance(r.get('close'),(int,float)) and math.isfinite(r['close'])]
+          assert len(macros)==4 and len(good)>=3, 'Macro data incomplete; keep previous saved snapshots'
+          print('Validation passed:',len(valid),'/',len(rows),'same-date rows;',len(good),'/4 macro symbols')
+          PY
+      - name: Save only validated data, preserving source homepage
+        run: |
+          git restore -- index.html
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/
-          git diff --staged --quiet || (git commit -m "chore: refresh dashboard data [automated]" && git push)
+          git add data/srm.json data/macro.json
+          if git diff --staged --quiet; then
+            echo "Snapshots unchanged."
+          else
+            git commit -m "chore: save validated SRM and macro snapshots"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
