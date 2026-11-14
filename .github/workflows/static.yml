@@ -32,6 +32,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Apply Chinese descriptions and simplify display columns
+        run: python scripts/localize_ui.py
       - name: Install macro data dependencies
         run: python -m pip install yfinance pandas
       - name: Generate macro snapshot and prepare deployment copy
