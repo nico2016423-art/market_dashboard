@@ -27,32 +27,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
-      - name: Check saved snapshot readiness
-        id: snapshots
-        run: |
-          if test -s data/srm.json && test -s data/macro.json; then
-            echo "ready=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "No saved snapshots yet. Waiting for Refresh dashboard data; existing live site is unchanged." >> "$GITHUB_STEP_SUMMARY"
-          fi
-      - name: Set up Python for local file preparation only
-        if: steps.snapshots.outputs.ready == 'true'
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Prepare site without downloading market data
-        if: steps.snapshots.outputs.ready == 'true'
-        run: python scripts/prepare_site.py --version "$(git rev-parse --short HEAD)"
       - name: Setup Pages
-        if: steps.snapshots.outputs.ready == 'true'
         uses: actions/configure-pages@v5
-      - name: Upload artifact
-        if: steps.snapshots.outputs.ready == 'true'
+      - name: Upload ready-to-serve site without data dependencies
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
       - name: Deploy to GitHub Pages
-        if: steps.snapshots.outputs.ready == 'true'
         id: deployment
         uses: actions/deploy-pages@v4

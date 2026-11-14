@@ -4,7 +4,6 @@
 # Modifications: Python daily snapshot port for APEX dashboard; not Pine-verified.
 import ast
 import json
-import re
 from pathlib import Path
 from datetime import datetime, time, timedelta, timezone
 from zoneinfo import ZoneInfo
@@ -172,15 +171,7 @@ def main():
     data=dict(groups=output,built_at=datetime.now(timezone.utc).isoformat(),as_of=str(asof.date()) if asof is not None else None,errors=errors,source='Yahoo Finance via yfinance',note='日線快照：一般交易日美東16:15前排除當日。ETF使用調整後價格。Stage固定落後資料最後一根日線；採5年歷史重播，初始化可能與TradingView不同。尚未逐項通過Pine對照測試。',params=dict(ema=21,momentum=5,stdev=20,threshold=1,position=180,stage_ma=150,stage_slope=20,stage_buffer=2,stage_threshold=1,stage_confirm=3))
     out=ROOT/'data'/'srm.json'
     out.write_text(json.dumps(data,ensure_ascii=False,allow_nan=False,indent=2),encoding='utf-8')
-    page=ROOT/'index.html'
-    html=page.read_text(encoding='utf-8')
-    pattern=r'<script>\s*\(function\(\)\{.*?</script>'
-    html,count=re.subn(pattern,'<script src="srm.js?v=1"></script>',html,flags=re.S)
-    if count!=1:
-        raise RuntimeError('無法安全定位原清單程式，停止發布')
-    html=html.replace('搜尋代號，例如 SPY、SMH','搜尋代號／中文，例如 XSD、半導體').replace('搜尋股票代號','搜尋代號或中文描述')
-    page.write_text(html,encoding='utf-8')
-    print('SRM snapshot:',len(prices),'valid symbols;',len(errors),'errors; source homepage unchanged in repository.')
+    print('SRM snapshot:',len(prices),'valid symbols;',len(errors),'errors. Homepage is never modified by this data job.')
 
 if __name__=='__main__':
     main()
