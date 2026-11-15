@@ -7,6 +7,7 @@ on:
     branches: ["main"]
     paths:
       - 'scripts/build_watchlist.py'
+      - 'scripts/build_simple_watchlist.py'
       - 'scripts/build_data.py'
       - 'data/watchlist.txt'
       - 'data/labels_zh.json'
@@ -29,15 +30,15 @@ jobs:
           python-version: '3.11'
       - name: Install dependencies
         run: python -m pip install yfinance pandas numpy
-      - name: Build validated simple watchlist
-        run: python scripts/build_watchlist.py
+      - name: Build validated daily watchlist
+        run: python scripts/build_simple_watchlist.py
       - name: Save snapshot only
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/watchlist.json
           if ! git diff --staged --quiet; then
-            git commit -m "chore: refresh simple watchlist snapshot"
+            git commit -m "chore: refresh own-return watchlist snapshot"
             git pull --rebase origin main
             git push origin HEAD:main
           fi
